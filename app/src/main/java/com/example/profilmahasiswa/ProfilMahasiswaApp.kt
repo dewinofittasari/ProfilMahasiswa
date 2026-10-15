@@ -5,22 +5,23 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -33,19 +34,25 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.AccountBalance
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Badge
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PersonOutline
 import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Task
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -54,6 +61,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -66,6 +74,8 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -77,20 +87,15 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.profilmahasiswa.ui.theme.AccentBlue
 import com.example.profilmahasiswa.ui.theme.BorderColor
-import com.example.profilmahasiswa.ui.theme.CardBackground
 import com.example.profilmahasiswa.ui.theme.DisabledGray
-import com.example.profilmahasiswa.ui.theme.Divider
 import com.example.profilmahasiswa.ui.theme.ErrorRed
-import com.example.profilmahasiswa.ui.theme.LightBlue
 import com.example.profilmahasiswa.ui.theme.PrimaryBlue
-import com.example.profilmahasiswa.ui.theme.PrimaryBlueDark
-import com.example.profilmahasiswa.ui.theme.SurfaceBlue
 import com.example.profilmahasiswa.ui.theme.TextHint
 import com.example.profilmahasiswa.ui.theme.TextPrimary
 import com.example.profilmahasiswa.ui.theme.TextSecondary
 import com.example.profilmahasiswa.ui.theme.UniverMuliaBlue
-import com.example.profilmahasiswa.ui.theme.UniverMuliaDeepBlue
 import com.example.profilmahasiswa.ui.theme.UniverMuliaDarkBlue
+import com.example.profilmahasiswa.ui.theme.UniverMuliaDeepBlue
 import com.example.profilmahasiswa.ui.theme.UniverMuliaGold
 import com.example.profilmahasiswa.ui.theme.UniverMuliaGreen
 import com.example.profilmahasiswa.ui.theme.UniverMuliaRed
@@ -107,7 +112,7 @@ fun ProfilMahasiswaApp(viewModel: ProfilViewModel = viewModel()) {
     LaunchedEffect(viewModel.showSnackbar) {
         if (viewModel.showSnackbar) {
             val result = snackbarHostState.showSnackbar(
-                message = "✅  Data berhasil disimpan!",
+                message = "✅  Data profil berhasil disimpan!",
                 actionLabel = "OK",
                 duration = SnackbarDuration.Short
             )
@@ -124,7 +129,7 @@ fun ProfilMahasiswaApp(viewModel: ProfilViewModel = viewModel()) {
                 modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars)
             )
         },
-        containerColor = Color(0xFFF5F7FF)
+        containerColor = Color(0xFFF0F4FF)
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -132,53 +137,24 @@ fun ProfilMahasiswaApp(viewModel: ProfilViewModel = viewModel()) {
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Top university header bar
+            // ── University header with building visual ──
             UniversityHeader()
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(0.dp)
-            ) {
-                // Page title
-                Text(
-                    text = "Form Profil Mahasiswa",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary,
-                    modifier = Modifier.padding(vertical = 12.dp)
-                )
+            // ── Form card ──
+            FormCard(viewModel = viewModel)
 
-                // Mini profile preview card (top)
-                MiniProfileCard(profile = viewModel.savedProfile)
+            Spacer(modifier = Modifier.height(16.dp))
 
-                Spacer(modifier = Modifier.height(16.dp))
+            // ── Digital student card ──
+            DigitalStudentCard(profile = viewModel.savedProfile)
 
-                // Input fields
-                FormSection(viewModel = viewModel)
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // Save button
-                SaveButton(
-                    enabled = viewModel.isFormValid,
-                    onClick = viewModel::simpanData
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // Digital card section
-                DigitalKartuSection(profile = viewModel.savedProfile)
-
-                Spacer(modifier = Modifier.height(24.dp))
-            }
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// University header
+// University header with building background effect
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
@@ -188,31 +164,78 @@ private fun UniversityHeader() {
             .fillMaxWidth()
             .background(
                 brush = Brush.horizontalGradient(
-                    colors = listOf(UniverMuliaDarkBlue, UniverMuliaBlue)
+                    colors = listOf(
+                        UniverMuliaDarkBlue,
+                        UniverMuliaBlue,
+                        Color(0xFF2A5FAA)
+                    )
                 )
             )
             .windowInsetsPadding(WindowInsets.statusBars)
-            .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        // Right side – simulated building silhouette pattern
+        Box(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = 8.dp, top = 8.dp, bottom = 8.dp)
         ) {
-            // Logo placeholder (colored circle)
+            // Simulated building blocks
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
+                verticalAlignment = Alignment.Bottom,
+                modifier = Modifier.padding(top = 4.dp)
+            ) {
+                // Building silhouettes using boxes
+                BuildingBlock(width = 18, height = 50, alpha = 0.10f)
+                BuildingBlock(width = 22, height = 65, alpha = 0.12f)
+                BuildingBlock(width = 20, height = 45, alpha = 0.08f)
+                BuildingBlock(width = 26, height = 72, alpha = 0.14f)
+                BuildingBlock(width = 16, height = 38, alpha = 0.10f)
+            }
+            // Label overlay
+            Text(
+                text = "UNIVERSITAS MULIA",
+                color = Color.White.copy(alpha = 0.20f),
+                fontSize = 8.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 4.dp, bottom = 2.dp)
+            )
+        }
+
+        // Left side – Logo + Text
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            // University logo placeholder
             Box(
                 modifier = Modifier
-                    .size(52.dp)
+                    .size(64.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.15f))
+                    .background(Color.White.copy(alpha = 0.12f))
                     .border(2.dp, UniverMuliaGold, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "UM",
-                    color = UniverMuliaGold,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 16.sp
-                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        imageVector = Icons.Default.School,
+                        contentDescription = null,
+                        tint = UniverMuliaGold,
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Text(
+                        text = "UM",
+                        color = Color.White,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                }
             }
 
             Column {
@@ -226,7 +249,7 @@ private fun UniversityHeader() {
                 Text(
                     text = "UNIVERSITAS MULIA",
                     color = Color.White,
-                    fontSize = 18.sp,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 0.5.sp
                 )
@@ -234,11 +257,25 @@ private fun UniversityHeader() {
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    CircleDot(color = UniverMuliaGold)
+                    DotIndicator(color = UniverMuliaGold)
                     Text(
-                        text = "Inovatif  •  Mandiri  •  Humanis",
-                        color = Color.White.copy(alpha = 0.80f),
-                        fontSize = 10.sp,
+                        text = "Inovatif",
+                        color = Color.White.copy(alpha = 0.85f),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    DotIndicator(color = UniverMuliaGreen)
+                    Text(
+                        text = "Mandiri",
+                        color = Color.White.copy(alpha = 0.85f),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    DotIndicator(color = AccentBlue)
+                    Text(
+                        text = "Humanis",
+                        color = Color.White.copy(alpha = 0.85f),
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Medium
                     )
                 }
@@ -248,7 +285,18 @@ private fun UniversityHeader() {
 }
 
 @Composable
-private fun CircleDot(color: Color) {
+private fun BuildingBlock(width: Int, height: Int, alpha: Float) {
+    Box(
+        modifier = Modifier
+            .width(width.dp)
+            .height(height.dp)
+            .clip(RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp))
+            .background(Color.White.copy(alpha = alpha))
+    )
+}
+
+@Composable
+private fun DotIndicator(color: Color) {
     Box(
         modifier = Modifier
             .size(6.dp)
@@ -258,152 +306,305 @@ private fun CircleDot(color: Color) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Mini profile preview card (shown at top of form)
+// Main form card (white rounded card)
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun MiniProfileCard(profile: MahasiswaProfile?) {
+private fun FormCard(viewModel: ProfilViewModel) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .offset(y = (-12).dp)
+            .padding(horizontal = 12.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 18.dp, vertical = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(0.dp)
+        ) {
+            // ── Form title row ──
+            FormTitleRow()
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ── Status card (Belum ada data / profile preview) ──
+            StatusPreviewCard(profile = viewModel.savedProfile)
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // ── Input: Nama Lengkap ──
+            FormFieldWithIcon(
+                icon = Icons.Default.PersonOutline,
+                iconTint = PrimaryBlue,
+                label = "Nama Lengkap",
+                value = viewModel.namaInput,
+                onValueChange = viewModel::onNamaChange,
+                placeholder = "Masukkan nama lengkap",
+                errorMessage = viewModel.namaError,
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Words,
+                    imeAction = ImeAction.Next
+                ),
+                onFocusLost = viewModel::onNamaFocusLost
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ── Input: NIM ──
+            FormFieldWithIcon(
+                icon = Icons.Default.Badge,
+                iconTint = PrimaryBlue,
+                label = "NIM (Nomor Induk Mahasiswa)",
+                value = viewModel.nimInput,
+                onValueChange = viewModel::onNimChange,
+                placeholder = "Contoh: 2411009",
+                errorMessage = viewModel.nimError,
+                leadingIcon = Icons.Default.Badge,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                ),
+                onFocusLost = viewModel::onNimFocusLost
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ── Input: Program Studi ──
+            FormFieldWithIcon(
+                icon = Icons.Default.School,
+                iconTint = PrimaryBlue,
+                label = "Program Studi",
+                value = viewModel.prodiInput,
+                onValueChange = viewModel::onProdiChange,
+                placeholder = "Contoh: S1 Informatika",
+                errorMessage = viewModel.prodiError,
+                leadingIcon = Icons.Default.MenuBook,
+                trailingIcon = Icons.Default.ArrowDropDown,
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Words,
+                    imeAction = ImeAction.Done
+                ),
+                onFocusLost = viewModel::onProdiFocusLost
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // ── Save button ──
+            SaveButton(
+                enabled = viewModel.isFormValid,
+                onClick = viewModel::simpanData
+            )
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Form title row
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun FormTitleRow() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.weight(1f)
+        ) {
+            // Blue icon circle with person icon
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(PrimaryBlue),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            Column {
+                Text(
+                    text = "Form Profil Mahasiswa",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = TextPrimary
+                )
+                Text(
+                    text = "Lengkapi data diri Anda untuk melanjutkan proses akademik.",
+                    fontSize = 12.sp,
+                    color = TextSecondary,
+                    lineHeight = 16.sp
+                )
+            }
+        }
+
+        // Right side motto text
+        Column(
+            horizontalAlignment = Alignment.End,
+            modifier = Modifier.padding(start = 8.dp)
+        ) {
+            Text(
+                text = "Bersama",
+                fontSize = 10.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = PrimaryBlue.copy(alpha = 0.7f),
+                textAlign = TextAlign.End
+            )
+            Text(
+                text = "Membangun",
+                fontSize = 10.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = PrimaryBlue.copy(alpha = 0.7f),
+                textAlign = TextAlign.End
+            )
+            Text(
+                text = "Masa Depan",
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                color = PrimaryBlue,
+                textAlign = TextAlign.End
+            )
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Status preview card (shows saved data or "Belum ada data")
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun StatusPreviewCard(profile: MahasiswaProfile?) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (profile != null) Color(0xFFE8F5E9) else Color(0xFFF0F4FF)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(14.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Avatar
+            // Graduation cap icon
             Box(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .background(
-                        if (profile != null) PrimaryBlue else Color(0xFFE8ECF8)
+                        if (profile != null)
+                            UniverMuliaGreen.copy(alpha = 0.15f)
+                        else
+                            PrimaryBlue.copy(alpha = 0.1f)
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                if (profile != null) {
-                    Text(
-                        text = profile.nama.firstOrNull()?.uppercaseChar()?.toString() ?: "?",
-                        color = Color.White,
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                } else {
-                    Text(
-                        text = "?",
-                        color = TextHint,
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Default.School,
+                    contentDescription = null,
+                    tint = if (profile != null) UniverMuliaGreen else PrimaryBlue,
+                    modifier = Modifier.size(28.dp)
+                )
             }
 
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = profile?.nama ?: "Belum ada data",
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 15.sp,
-                    color = if (profile != null) TextPrimary else TextSecondary
+                    text = if (profile != null) profile.nama else "Belum ada data",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = TextPrimary
                 )
                 Text(
-                    text = "NIM: ${profile?.nim ?: "-"}",
-                    fontSize = 13.sp,
-                    color = TextSecondary
+                    text = if (profile != null)
+                        "NIM: ${profile.nim} • ${profile.programStudi}"
+                    else
+                        "Silakan lengkapi data profil mahasiswa Anda.",
+                    fontSize = 12.sp,
+                    color = TextSecondary,
+                    lineHeight = 16.sp
                 )
-                if (profile != null) {
-                    Text(
-                        text = profile.programStudi,
-                        fontSize = 12.sp,
-                        color = PrimaryBlue,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
+            }
+
+            // Arrow button
+            IconButton(
+                onClick = { },
+                modifier = Modifier
+                    .size(36.dp)
+                    .border(
+                        width = 1.dp,
+                        color = if (profile != null)
+                            UniverMuliaGreen.copy(alpha = 0.3f)
+                        else
+                            PrimaryBlue.copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(10.dp)
+                    ),
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = Color.Transparent
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = "Detail",
+                    tint = if (profile != null) UniverMuliaGreen else PrimaryBlue,
+                    modifier = Modifier.size(18.dp)
+                )
             }
         }
     }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Input form section
+// Form field with external icon label
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun FormSection(viewModel: ProfilViewModel) {
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        // Nama Lengkap
-        ProfileTextField(
-            label = "Nama Lengkap",
-            value = viewModel.namaInput,
-            onValueChange = viewModel::onNamaChange,
-            placeholder = "Masukkan nama lengkap",
-            leadingIcon = Icons.Default.Person,
-            errorMessage = viewModel.namaError,
-            keyboardOptions = KeyboardOptions(
-                capitalization = KeyboardCapitalization.Words,
-                imeAction = ImeAction.Next
-            ),
-            onFocusLost = viewModel::onNamaFocusLost
-        )
-
-        // NIM
-        ProfileTextField(
-            label = "NIM (Nomor Induk Mahasiswa)",
-            value = viewModel.nimInput,
-            onValueChange = viewModel::onNimChange,
-            placeholder = "Contoh: 2411009",
-            leadingIcon = Icons.Default.Badge,
-            errorMessage = viewModel.nimError,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Next
-            ),
-            onFocusLost = viewModel::onNimFocusLost
-        )
-
-        // Program Studi
-        ProfileTextField(
-            label = "Program Studi",
-            value = viewModel.prodiInput,
-            onValueChange = viewModel::onProdiChange,
-            placeholder = "Contoh: S1 Informatika",
-            leadingIcon = Icons.Default.Star,
-            errorMessage = viewModel.prodiError,
-            keyboardOptions = KeyboardOptions(
-                capitalization = KeyboardCapitalization.Words,
-                imeAction = ImeAction.Done
-            ),
-            onFocusLost = viewModel::onProdiFocusLost
-        )
-    }
-}
-
-@Composable
-private fun ProfileTextField(
+private fun FormFieldWithIcon(
+    icon: ImageVector,
+    iconTint: Color,
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
-    leadingIcon: ImageVector,
     errorMessage: String?,
+    leadingIcon: ImageVector? = null,
+    trailingIcon: ImageVector? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     onFocusLost: () -> Unit = {}
 ) {
     val isError = errorMessage != null
-    val borderColor = when {
+    val fieldBorderColor = when {
         isError -> ErrorRed
         value.isNotEmpty() -> PrimaryBlue
         else -> BorderColor
     }
 
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        // Label row
-        Row(verticalAlignment = Alignment.CenterVertically) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        // Label row with icon
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconTint,
+                modifier = Modifier.size(20.dp)
+            )
             Text(
                 text = label,
                 fontSize = 14.sp,
@@ -411,13 +612,14 @@ private fun ProfileTextField(
                 color = TextPrimary
             )
             Text(
-                text = " *",
+                text = "*",
                 color = ErrorRed,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold
             )
         }
 
+        // Text field
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
@@ -433,31 +635,56 @@ private fun ProfileTextField(
                     fontSize = 14.sp
                 )
             },
-            leadingIcon = {
-                Icon(
-                    imageVector = leadingIcon,
-                    contentDescription = null,
-                    tint = if (isError) ErrorRed else if (value.isNotEmpty()) PrimaryBlue else TextHint,
-                    modifier = Modifier.size(20.dp)
-                )
-            },
-            trailingIcon = {
-                AnimatedVisibility(
-                    visible = value.isNotEmpty() && !isError,
-                    enter = fadeIn(tween(200)),
-                    exit = fadeOut(tween(200))
-                ) {
+            leadingIcon = if (leadingIcon != null) {
+                {
                     Icon(
-                        imageVector = Icons.Default.CheckCircle,
-                        contentDescription = "Valid",
-                        tint = UniverMuliaGreen,
-                        modifier = Modifier.size(18.dp)
+                        imageVector = leadingIcon,
+                        contentDescription = null,
+                        tint = if (isError) ErrorRed
+                        else if (value.isNotEmpty()) PrimaryBlue
+                        else TextHint,
+                        modifier = Modifier.size(20.dp)
                     )
+                }
+            } else null,
+            trailingIcon = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    // Valid checkmark
+                    AnimatedVisibility(
+                        visible = value.isNotEmpty() && !isError,
+                        enter = fadeIn(tween(200)),
+                        exit = fadeOut(tween(200))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = "Valid",
+                            tint = UniverMuliaGreen,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    // Optional trailing icon (dropdown arrow)
+                    if (trailingIcon != null) {
+                        Icon(
+                            imageVector = trailingIcon,
+                            contentDescription = null,
+                            tint = TextHint,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
             },
             isError = isError,
             supportingText = if (isError) {
-                { Text(text = errorMessage!!, color = ErrorRed, fontSize = 12.sp) }
+                {
+                    Text(
+                        text = errorMessage!!,
+                        color = ErrorRed,
+                        fontSize = 12.sp
+                    )
+                }
             } else null,
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
@@ -468,7 +695,7 @@ private fun ProfileTextField(
                 unfocusedBorderColor = BorderColor,
                 errorBorderColor = ErrorRed,
                 focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
+                unfocusedContainerColor = Color(0xFFFAFBFF),
                 errorContainerColor = Color(0xFFFFF5F5),
                 focusedTextColor = TextPrimary,
                 unfocusedTextColor = TextPrimary,
@@ -479,7 +706,7 @@ private fun ProfileTextField(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Save button
+// Save button with arrow icon on right
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
@@ -495,9 +722,9 @@ private fun SaveButton(enabled: Boolean, onClick: () -> Unit) {
         enabled = enabled,
         modifier = Modifier
             .fillMaxWidth()
-            .height(52.dp)
+            .height(54.dp)
             .scale(scale),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(14.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = PrimaryBlue,
             disabledContainerColor = DisabledGray,
@@ -509,111 +736,112 @@ private fun SaveButton(enabled: Boolean, onClick: () -> Unit) {
         )
     ) {
         Row(
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            // Left spacer for centering
+            Spacer(modifier = Modifier.width(24.dp))
+
+            // Center content
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Task,
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp)
+                )
+                Text(
+                    text = "Simpan Perubahan",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.3.sp
+                )
+            }
+
+            // Right arrow
             Icon(
-                imageVector = Icons.Default.Check,
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                 contentDescription = null,
-                modifier = Modifier.size(18.dp)
-            )
-            Text(
-                text = "Simpan Perubahan",
-                fontSize = 15.sp,
-                fontWeight = FontWeight.SemiBold,
-                letterSpacing = 0.3.sp
+                modifier = Modifier.size(22.dp)
             )
         }
     }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Digital student ID card
+// Digital student card (horizontal layout with 4 columns)
 // ─────────────────────────────────────────────────────────────────────────────
-
-@Composable
-private fun DigitalKartuSection(profile: MahasiswaProfile?) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        // Section label
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(4.dp)
-                    .height(20.dp)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(PrimaryBlue)
-            )
-            Text(
-                text = "Kartu Digital Mahasiswa",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary
-            )
-        }
-
-        DigitalStudentCard(profile = profile)
-    }
-}
 
 @Composable
 private fun DigitalStudentCard(profile: MahasiswaProfile?) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp),
+        shape = RoundedCornerShape(18.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
                     brush = Brush.verticalGradient(
-                        colors = listOf(UniverMuliaDarkBlue, UniverMuliaDeepBlue)
+                        colors = listOf(
+                            UniverMuliaDarkBlue,
+                            UniverMuliaDeepBlue
+                        )
                     )
                 )
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                // ── Card top accent stripe ─────────────────────────────────
+                // ── Top stripe ──
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(5.dp)
+                            .height(4.dp)
                             .background(UniverMuliaRed)
                     )
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(5.dp)
+                            .height(4.dp)
                             .background(UniverMuliaGold)
                     )
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(5.dp)
-                            .background(Color(0xFF1565C0))
+                            .height(4.dp)
+                            .background(PrimaryBlue)
                     )
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(5.dp)
+                            .height(4.dp)
                             .background(UniverMuliaGreen)
                     )
                 }
 
+                // ── Header section ──
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                        .padding(horizontal = 20.dp, vertical = 14.dp)
                 ) {
-                    // Header label
+                    // KARTU DIGITAL label
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        Icon(
+                            imageVector = Icons.Default.School,
+                            contentDescription = null,
+                            tint = UniverMuliaGold,
+                            modifier = Modifier.size(18.dp)
+                        )
                         Text(
                             text = "KARTU DIGITAL",
                             color = UniverMuliaGold,
@@ -635,104 +863,110 @@ private fun DigitalStudentCard(profile: MahasiswaProfile?) {
                         )
                     }
 
-                    // Card title row with avatar
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    // Title row
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Profil Mahasiswa",
-                            color = Color.White,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        // Avatar circle
-                        Box(
-                            modifier = Modifier
-                                .size(44.dp)
-                                .clip(CircleShape)
-                                .background(Color.White.copy(alpha = 0.12f))
-                                .border(
-                                    width = 2.dp,
-                                    color = UniverMuliaGold.copy(alpha = 0.6f),
-                                    shape = CircleShape
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (profile != null) {
-                                Text(
-                                    text = profile.nama.firstOrNull()?.uppercaseChar()?.toString() ?: "?",
-                                    color = Color.White,
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Default.AccountCircle,
-                                    contentDescription = null,
-                                    tint = Color.White.copy(alpha = 0.5f),
-                                    modifier = Modifier.size(28.dp)
-                                )
-                            }
-                        }
-                    }
-
-                    HorizontalDivider(
-                        color = Color.White.copy(alpha = 0.15f),
-                        thickness = 1.dp
-                    )
-
-                    // Data rows
-                    CardDataRow(label = "Nama", value = profile?.nama)
-                    CardDataRow(label = "NIM", value = profile?.nim)
-                    CardDataRow(label = "Program Studi", value = profile?.programStudi)
-
-                    HorizontalDivider(
-                        color = Color.White.copy(alpha = 0.15f),
-                        thickness = 1.dp
-                    )
-
-                    // Footer
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Perguruan Tinggi",
-                            color = Color.White.copy(alpha = 0.6f),
-                            fontSize = 13.sp
-                        )
-                        Text(
-                            text = "Universitas Mulia",
-                            color = UniverMuliaGold,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-
-                    // Bottom bar with school icon
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.School,
                             contentDescription = null,
-                            tint = Color.White.copy(alpha = 0.2f),
-                            modifier = Modifier.size(16.dp)
+                            tint = UniverMuliaGold.copy(alpha = 0.6f),
+                            modifier = Modifier.size(32.dp)
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Sistem Akademik Terpadu – UM",
-                            color = Color.White.copy(alpha = 0.25f),
-                            fontSize = 10.sp,
-                            letterSpacing = 0.5.sp
+                            text = "Profil Mahasiswa",
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold
                         )
                     }
+                }
+
+                HorizontalDivider(
+                    color = Color.White.copy(alpha = 0.1f),
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
+
+                // ── 4 column data section ──
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min)
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    CardDataColumn(
+                        icon = Icons.Default.PersonOutline,
+                        label = "Nama",
+                        value = profile?.nama,
+                        modifier = Modifier.weight(1f)
+                    )
+                    VerticalDivider(
+                        color = Color.White.copy(alpha = 0.15f),
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .width(1.dp)
+                    )
+                    CardDataColumn(
+                        icon = Icons.Default.Badge,
+                        label = "NIM",
+                        value = profile?.nim,
+                        modifier = Modifier.weight(1f)
+                    )
+                    VerticalDivider(
+                        color = Color.White.copy(alpha = 0.15f),
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .width(1.dp)
+                    )
+                    CardDataColumn(
+                        icon = Icons.Default.MenuBook,
+                        label = "Program Studi",
+                        value = profile?.programStudi,
+                        modifier = Modifier.weight(1f)
+                    )
+                    VerticalDivider(
+                        color = Color.White.copy(alpha = 0.15f),
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .width(1.dp)
+                    )
+                    CardDataColumn(
+                        icon = Icons.Default.AccountBalance,
+                        label = "Perguruan Tinggi",
+                        value = "Universitas Mulia",
+                        valueColor = UniverMuliaGold,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                HorizontalDivider(
+                    color = Color.White.copy(alpha = 0.08f),
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
+
+                // ── Footer – motivational tagline ──
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 12.dp)
+                ) {
+                    Text(
+                        text = "Langkah Kecil\nMenuju Masa Depan Besar",
+                        color = UniverMuliaGold.copy(alpha = 0.7f),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        fontStyle = FontStyle.Italic,
+                        fontFamily = FontFamily.Serif,
+                        textAlign = TextAlign.End,
+                        lineHeight = 16.sp,
+                        modifier = Modifier.align(Alignment.CenterEnd)
+                    )
                 }
             }
         }
@@ -740,25 +974,39 @@ private fun DigitalStudentCard(profile: MahasiswaProfile?) {
 }
 
 @Composable
-private fun CardDataRow(label: String, value: String?) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Top
+private fun CardDataColumn(
+    icon: ImageVector,
+    label: String,
+    value: String?,
+    valueColor: Color = Color.White,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.padding(horizontal = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = Color.White.copy(alpha = 0.5f),
+            modifier = Modifier.size(16.dp)
+        )
         Text(
             text = label,
-            color = Color.White.copy(alpha = 0.60f),
-            fontSize = 13.sp,
-            modifier = Modifier.weight(0.4f)
+            color = Color.White.copy(alpha = 0.6f),
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Medium,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
         Text(
             text = value ?: "–",
-            color = if (value != null) Color.White else Color.White.copy(alpha = 0.35f),
-            fontSize = 13.sp,
-            fontWeight = if (value != null) FontWeight.Medium else FontWeight.Normal,
-            modifier = Modifier.weight(0.6f),
-            textAlign = TextAlign.End,
+            color = if (value != null) valueColor else Color.White.copy(alpha = 0.3f),
+            fontSize = 11.sp,
+            fontWeight = if (value != null) FontWeight.Bold else FontWeight.Normal,
+            textAlign = TextAlign.Center,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
