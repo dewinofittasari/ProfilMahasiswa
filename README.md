@@ -9,7 +9,7 @@ Proyek ini dibangun menggunakan **Kotlin** dan **Jetpack Compose (Material 3)** 
 * **Nama Lengkap**: Dewi Nofitta Sari
 * **NIM**: 2411065
 * **Program Studi**: Sistem Informasi
-* **Mata Kuliah**: Pemrograman Perangkat Bergerak / Mobile Application Development
+* **Mata Kuliah**: Pemrograman Aplikasi Bergerak / Mobile Application Development
 
 ---
 
