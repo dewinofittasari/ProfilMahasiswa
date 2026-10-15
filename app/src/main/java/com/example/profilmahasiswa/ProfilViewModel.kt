@@ -1,36 +1,58 @@
 package com.example.profilmahasiswa
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 
 /**
- * Data class representing a saved student profile.
+ * Model data profil mahasiswa yang telah tersimpan
  */
 data class MahasiswaProfile(
     val nama: String,
     val nim: String,
-    val programStudi: String
+    val email: String,
+    val programStudi: String,
+    val semester: Int,
+    val isAktif: Boolean
 )
 
 /**
- * ViewModel that holds form state, validation logic, and the saved profile.
+ * ViewModel yang mengelola State, Event, dan logika validasi profil mahasiswa.
+ * Konsep Unidirectional Data Flow (UDF):
+ * - State mengalir ke bawah (ke UI Composable)
+ * - Event mengalir ke atas (dari interaksi UI ke ViewModel)
  */
 class ProfilViewModel : ViewModel() {
 
-    // ── Form field states ──────────────────────────────────────────────────────
+    // ── STATE FORM ─────────────────────────────────────────────────────────────
 
+    // 1. Nama Mahasiswa
     var namaInput by mutableStateOf("")
         private set
 
+    // 2. NIM (Hanya angka)
     var nimInput by mutableStateOf("")
         private set
 
+    // 3. Email (Validasi format)
+    var emailInput by mutableStateOf("")
+        private set
+
+    // 4. Program Studi (Pilihan Chip)
     var prodiInput by mutableStateOf("")
         private set
 
-    // ── Touched flags (show errors only after user interacts with a field) ─────
+    // 5. Semester (Slider 1 sampai 8)
+    var semesterInput by mutableFloatStateOf(1f)
+        private set
+
+    // 6. Status Mahasiswa Aktif (Switch)
+    var isAktifInput by mutableStateOf(true)
+        private set
+
+    // ── STATE INTERAKSI & VALIDASI ─────────────────────────────────────────────
 
     var namaTouched by mutableStateOf(false)
         private set
@@ -38,28 +60,48 @@ class ProfilViewModel : ViewModel() {
     var nimTouched by mutableStateOf(false)
         private set
 
-    var prodiTouched by mutableStateOf(false)
+    var emailTouched by mutableStateOf(false)
         private set
 
-    // ── Saved profile ──────────────────────────────────────────────────────────
-
+    // State profil tersimpan & Banner Sukses
     var savedProfile by mutableStateOf<MahasiswaProfile?>(null)
         private set
 
-    // ── Snackbar trigger ───────────────────────────────────────────────────────
-
-    var showSnackbar by mutableStateOf(false)
+    var showSuccessBanner by mutableStateOf(false)
         private set
 
-    // ── Validation ─────────────────────────────────────────────────────────────
+    // Daftar Program Studi yang tersedia
+    val daftarProdi = listOf(
+        "Teknik Informatika",
+        "Sistem Informasi",
+        "Teknologi Informasi",
+        "Teknik Elektro",
+        "Bisnis Digital"
+    )
 
+    // ── LOGIKA VALIDASI ────────────────────────────────────────────────────────
+
+    // Regex standar untuk validasi format email
+    private val emailPattern = Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\$")
+
+    val isNamaValid: Boolean
+        get() = namaInput.trim().length >= 3
+
+    val isNimValid: Boolean
+        get() = nimInput.isNotBlank() && nimInput.all { it.isDigit() } && nimInput.length in 7..12
+
+    val isEmailValid: Boolean
+        get() = emailInput.isNotBlank() && emailPattern.matches(emailInput.trim())
+
+    val isProdiValid: Boolean
+        get() = prodiInput.isNotBlank()
+
+    // Pesan error jika field sudah disentuh (touched) tapi belum valid
     val namaError: String?
         get() = when {
             !namaTouched -> null
             namaInput.isBlank() -> "Nama lengkap tidak boleh kosong"
-            namaInput.trim().length < 3 -> "Nama harus minimal 3 karakter"
-            !namaInput.trim().matches(Regex("^[a-zA-Z .'-]+\$")) ->
-                "Nama hanya boleh berisi huruf dan spasi"
+            namaInput.trim().length < 3 -> "Nama minimal 3 karakter"
             else -> null
         }
 
@@ -67,67 +109,137 @@ class ProfilViewModel : ViewModel() {
         get() = when {
             !nimTouched -> null
             nimInput.isBlank() -> "NIM tidak boleh kosong"
-            !nimInput.matches(Regex("^[0-9]+\$")) -> "NIM hanya boleh berisi angka"
-            nimInput.length < 7 -> "NIM harus minimal 7 digit"
-            nimInput.length > 12 -> "NIM tidak boleh lebih dari 12 digit"
+            !nimInput.all { it.isDigit() } -> "NIM hanya boleh berisi angka"
+            nimInput.length < 7 -> "NIM minimal 7 digit angka"
+            nimInput.length > 12 -> "NIM maksimal 12 digit"
             else -> null
         }
 
-    val prodiError: String?
+    val emailError: String?
         get() = when {
-            !prodiTouched -> null
-            prodiInput.isBlank() -> "Program studi tidak boleh kosong"
-            prodiInput.trim().length < 3 -> "Program studi harus minimal 3 karakter"
+            !emailTouched -> null
+            emailInput.isBlank() -> "Email tidak boleh kosong"
+            !emailPattern.matches(emailInput.trim()) -> "Format email tidak valid (contoh: dewi@mhs.ac.id)"
             else -> null
         }
 
-    val isFormValid: Boolean
-        get() = namaInput.trim().length >= 3 &&
-                namaInput.trim().matches(Regex("^[a-zA-Z .'-]+\$")) &&
-                nimInput.matches(Regex("^[0-9]{7,12}\$")) &&
-                prodiInput.trim().length >= 3
-
-    // ── Event handlers ─────────────────────────────────────────────────────────
-
-    fun onNamaChange(value: String) {
-        namaInput = value
-        namaTouched = true
-    }
-
-    fun onNimChange(value: String) {
-        // Only allow digits input
-        if (value.all { it.isDigit() }) {
-            nimInput = value
+    // Perhitungan persentase kelengkapan (0 - 100%)
+    val completionPercentage: Float
+        get() {
+            var completedCount = 0
+            if (isNamaValid) completedCount++
+            if (isNimValid) completedCount++
+            if (isEmailValid) completedCount++
+            if (isProdiValid) completedCount++
+            if (semesterInput in 1f..8f) completedCount++
+            return (completedCount / 5f)
         }
-        nimTouched = true
+
+    // Form dinyatakan lengkap jika semua field valid 100%
+    val isFormComplete: Boolean
+        get() = isNamaValid && isNimValid && isEmailValid && isProdiValid
+
+    // Hitung inisial untuk avatar kartu pratinjau (misal: "Dewi Nofitta Sari" -> "DN")
+    val inisialNama: String
+        get() {
+            val trimmed = namaInput.trim()
+            if (trimmed.isBlank()) return "??"
+            val words = trimmed.split("\\s+".toRegex()).filter { it.isNotBlank() }
+            return when {
+                words.size >= 2 -> "${words[0].first().uppercaseChar()}${words[1].first().uppercaseChar()}"
+                words[0].length >= 2 -> words[0].take(2).uppercase()
+                else -> words[0].first().uppercaseChar().toString()
+            }
+        }
+
+    // ── EVENT HANDLERS (Aksi Pengguna) ─────────────────────────────────────────
+
+    fun onNamaChange(newValue: String) {
+        namaInput = newValue
+        namaTouched = true
+        showSuccessBanner = false
     }
 
-    fun onProdiChange(value: String) {
-        prodiInput = value
-        prodiTouched = true
+    fun onNimChange(newValue: String) {
+        // Filter: hanya izinkan karakter angka
+        if (newValue.all { it.isDigit() } && newValue.length <= 12) {
+            nimInput = newValue
+            nimTouched = true
+            showSuccessBanner = false
+        }
     }
 
-    fun onNamaFocusLost() { namaTouched = true }
-    fun onNimFocusLost()   { nimTouched = true }
-    fun onProdiFocusLost() { prodiTouched = true }
+    fun onEmailChange(newValue: String) {
+        emailInput = newValue
+        emailTouched = true
+        showSuccessBanner = false
+    }
 
-    fun simpanData() {
-        // Mark all fields as touched to trigger validation display
+    fun onProdiSelect(selected: String) {
+        prodiInput = selected
+        showSuccessBanner = false
+    }
+
+    fun onSemesterChange(newValue: Float) {
+        semesterInput = newValue
+        showSuccessBanner = false
+    }
+
+    fun onAktifChange(newValue: Boolean) {
+        isAktifInput = newValue
+        showSuccessBanner = false
+    }
+
+    fun simpanProfil() {
         namaTouched = true
         nimTouched = true
-        prodiTouched = true
+        emailTouched = true
 
-        if (isFormValid) {
+        if (isFormComplete) {
             savedProfile = MahasiswaProfile(
                 nama = namaInput.trim(),
                 nim = nimInput.trim(),
-                programStudi = prodiInput.trim()
+                email = emailInput.trim(),
+                programStudi = prodiInput,
+                semester = semesterInput.toInt(),
+                isAktif = isAktifInput
             )
-            showSnackbar = true
+            showSuccessBanner = true
         }
     }
 
-    fun onSnackbarDismissed() {
-        showSnackbar = false
+    fun tutupBanner() {
+        showSuccessBanner = false
+    }
+
+    fun resetForm() {
+        namaInput = ""
+        nimInput = ""
+        emailInput = ""
+        prodiInput = ""
+        semesterInput = 1f
+        isAktifInput = true
+        namaTouched = false
+        nimTouched = false
+        emailTouched = false
+        savedProfile = null
+        showSuccessBanner = false
+    }
+
+    /**
+     * Memudahkan pengisian data otomatis dengan data mahasiswa:
+     * Dewi Nofitta Sari (NIM: 2411065)
+     */
+    fun isiDataDewi() {
+        namaInput = "Dewi Nofitta Sari"
+        nimInput = "2411065"
+        emailInput = "dewi.nofitta@mhs.ac.id"
+        prodiInput = "Sistem Informasi"
+        semesterInput = 4f
+        isAktifInput = true
+        namaTouched = true
+        nimTouched = true
+        emailTouched = true
+        showSuccessBanner = false
     }
 }

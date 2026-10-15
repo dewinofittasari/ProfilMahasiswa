@@ -1,60 +1,92 @@
-# 🎓 Profil Mahasiswa — Aplikasi Android Jetpack Compose
+# 📱 Praktikum Jetpack Compose: Profil Mahasiswa
+**Eksplorasi State, Event, dan Recomposition di Android Modern**
 
-Aplikasi formulir profil mahasiswa dan kartu identitas digital mahasiswa berbasis **Android Jetpack Compose & Kotlin** untuk pemenuhan tugas mata kuliah **Pemrograman Aplikasi Bergerak**.
+Proyek ini dibangun menggunakan **Kotlin** dan **Jetpack Compose (Material 3)** untuk mendemonstrasikan implementasi arsitektur *Unidirectional Data Flow* (UDF), manajemen *State*, penanganan *Event*, dan mekanisme *Recomposition* otomatis secara real-time.
+
+---
+
+## 👤 Identitas Mahasiswa
+* **Nama Lengkap**: Dewi Nofitta Sari
+* **NIM**: 2411065
+* **Program Studi**: Sistem Informasi
+* **Mata Kuliah**: Pemrograman Perangkat Bergerak / Mobile Application Development
 
 ---
 
 ## 📸 Tangkapan Layar Aplikasi (Screenshots)
 
-| 1. Form Kosong / Status Belum Ada Data | 2. Data Terisi, Tersimpan & Notifikasi Snackbar |
+| Kondisi Form Kosong (State Awal 20%) | Kondisi Form Terisi Lengkap (State Selesai 100%) |
 | :---: | :---: |
-| ![Form Kosong](screenshots/screenshot_empty_form.png) | ![Data Tersimpan](screenshots/screenshot_saved_profile.png) |
+| <img src="screenshots/screenshot_form_kosong.png" width="320" alt="Form Kosong - State Awal" /> | <img src="screenshots/screenshot_form_terisi.png" width="320" alt="Form Terisi - Dewi Nofitta Sari" /> |
+| *Avatar "?", Nama default, NIM belum diisi, kelengkapan 20%, tombol simpan non-aktif.* | *Avatar dinamis "DN", Nama & NIM terisi, chip prodi terpilih, kelengkapan 100%, siap disimpan.* |
 
 ---
 
-## 🚀 Fitur Utama
-1. **Input Data Mahasiswa**:
-   - Nama Lengkap (hanya huruf & spasi, minimal 3 karakter).
-   - NIM / Nomor Induk Mahasiswa (numeric keyboard, 7–12 digit angka).
-   - Program Studi (minimal 3 karakter).
-2. **Validasi Real-time & Error Handling**:
-   - Pesan error interaktif muncul di bawah input ketika data tidak sesuai aturan.
-   - Indikator centang hijau (valid) ketika format input sudah benar.
-3. **Tombol Simpan Dinamis**:
-   - Tombol *Simpan Perubahan* otomatis aktif (enabled) **hanya jika semua input valid**.
-4. **Kartu Profil Digital**:
-   - Kartu digital modern dengan aksen warna Universitas Mulia (merah, kuning, biru, hijau).
-   - Terintegrasi reaktif dengan data yang telah disimpan.
-5. **Notifikasi Snackbar**:
-   - Menampilkan konfirmasi pop-up saat data profil berhasil disimpan.
+## 📝 Refleksi Singkat (Learning Reflection)
+
+Praktikum ini memberikan pemahaman mendalam tentang pergeseran paradigma dari pemrograman Android imperatif (berbasis XML dan `findViewById`) menuju paradigma **deklaratif** pada **Jetpack Compose**:
+
+1. **Pemisahan State dan UI (State Hoisting & Single Source of Truth)**:
+   Seluruh status form tidak lagi disimpan di dalam widget UI, melainkan dipusatkan di dalam `ProfilViewModel` menggunakan `mutableStateOf`. Pendekatan ini membuat UI menjadi murni fungsi dari state (*UI = f(State)*), menghilangkan kemungkinan inkonsistensi data antara input form dan kartu pratinjau.
+
+2. **Aliran Data Searah (Unidirectional Data Flow - UDF)**:
+   Interaksi pengguna (seperti mengetik nama, memasukkan angka NIM, memilih chip prodi, menggeser slider semester, dan menyalakan switch) diperlakukan sebagai **Event** yang dikirimkan ke atas menuju ViewModel. ViewModel memvalidasi dan memperbarui **State**, yang kemudian dialirkan kembali ke bawah menuju komponen Composable.
+
+3. **Efisiensi Mekanisme Recomposition**:
+   Mekanisme *intelligent recomposition* pada Compose terbukti sangat efisien. Setiap kali satu karakter diketik atau saklar status disentuh, Compose hanya mengeksekusi ulang fungsi composable yang secara langsung membaca state tersebut (seperti `LivePreviewCard` dan `CompletionProgressBar`), sementara form input lainnya tidak perlu dirender ulang dari awal. Transisi warna gradasi kartu menggunakan `animateColorAsState` dan progress bar `animateFloatAsState` juga berjalan sangat mulus pada 60fps tanpa lagging.
 
 ---
 
-## 🛠️ Teknologi & Arsitektur
-- **Bahasa**: Kotlin 2.0
-- **UI Framework**: Jetpack Compose (Material3)
-- **Architecture Pattern**: MVVM (Model-View-ViewModel) menggunakan `State` & `mutableStateOf`
-- **Gradle Version Catalog**: `libs.versions.toml`
-- **Minimum SDK**: Android 7.0 (API level 24)
-- **Target SDK**: Android 15 (API level 35)
+## 🌟 Fitur Utama Aplikasi
+
+1. **⚡ Header Gradasi sebagai Pratinjau Langsung (Live Preview)**:
+   - Terletak di atas formulir dengan desain modern rounded card (`RoundedCornerShape(24.dp)`).
+   - Inisial avatar terhitung otomatis secara cerdas (*"Dewi Nofitta Sari"* $\rightarrow$ **"DN"**).
+   - Warna gradasi kartu bertransisi halus (*animated gradient*) saat status aktif/cuti diubah:
+     - **Mahasiswa Aktif**: Gradasi cerah (*Royal Blue $\rightarrow$ Indigo $\rightarrow$ Teal*).
+     - **Non-Aktif / Cuti**: Gradasi tenang (*Dark Slate Gray*).
+2. **📋 Formulir Input & Validasi**:
+   - **Nama Lengkap**: Validasi minimal 3 karakter dengan pesan error real-time.
+   - **NIM**: Difilter ketat di level event sehingga hanya menerima karakter digit angka (contoh: **2411065**).
+   - **Email**: Validasi format email berbasis Regex standar (memeriksa keberadaan `@` dan nama domain).
+   - **Pilihan Program Studi (FilterChip)**: Komponen chip interaktif dengan indikator centang terpilih.
+   - **Semester (Slider)**: Slider diskrit 1–8 dengan indikator teks "Semester X".
+   - **Status Mahasiswa (Switch)**: Toggle saklar untuk mahasiswa aktif vs cuti.
+3. **📊 Bilah Kelengkapan Profil (0–100%) Beranimasi**:
+   - Menggunakan `LinearProgressIndicator` dengan animasi spring physics.
+   - Dilengkapi checklist indikator mini (Nama, NIM, Email, Prodi, Semester).
+4. **💾 Tombol Simpan & Banner Sukses**:
+   - Tombol Simpan hanya aktif (*enabled*) ketika persentase kelengkapan mencapai 100%.
+   - Menampilkan banner hijau beranimasi (`AnimatedVisibility` dengan fade-in & expand) yang merangkum data mahasiswa yang tersimpan.
+   - Tombol pintas cepat: *"Isi Data Otomatis: Dewi Nofitta Sari (2411065)"* untuk kemudahan pengujian.
 
 ---
 
-## 📝 Refleksi Singkat Pengembangan
+## 🛠️ Struktur Berkas Proyek
 
-Pengembangan aplikasi **Profil Mahasiswa** dengan Jetpack Compose ini memberikan pemahaman mendalam mengenai paradigma **Declarative UI**:
-
-1. **State-Driven UI & Reaktivitas**:
-   Berbeda dengan XML imperative berbasis `findViewById`, Jetpack Compose membuat UI secara otomatis merender ulang (*recomposition*) ketika state di `ProfilViewModel` berubah. Hal ini menyederhanakan sinkronisasi antara input form, validasi tombol, dan tampilan kartu profil digital.
-
-2. **Validasi Input yang Bersih**:
-   Pemisahan aturan logika bisnis (validasi regex, panjang karakter, kondisi enabled tombol) ke dalam ViewModel menjaga komponen UI tetap bersih, modular, dan mudah diuji (*testable*). Mekanisme penanda interaksi pengguna (*touched state*) mencegah munculnya pesan error sebelum pengguna mulai mengetik.
-
-3. **Material Design 3 & Konsistensi Visual**:
-   Komposisi visual seperti gradien warna tema universitas, sudut membulat (*rounded corners*), indikator status, serta integrasi Scaffold dengan `SnackbarHost` menunjukkan fleksibilitas Compose dalam menghasilkan desain modern dan elegan tanpa boilerplate kode XML yang rumit.
+```text
+ProfilMahasiswa/
+├── app/
+│   ├── src/
+│   │   ├── main/
+│   │   │   └── java/com/example/profilmahasiswa/
+│   │   │       ├── MainActivity.kt        # Entry point activity
+│   │   │       ├── ProfilMahasiswaApp.kt  # Seluruh Composable UI & Layout
+│   │   │       └── ProfilViewModel.kt     # Pengelola State, Event & Validasi
+│   │   └── test/
+│   │       └── java/com/example/profilmahasiswa/
+│   │           └── ProfilViewModelTest.kt # Unit Test logika State & Event (Passed)
+│   └── build.gradle.kts
+├── screenshots/
+│   ├── screenshot_form_kosong.png         # Tangkapan layar form kosong
+│   └── screenshot_form_terisi.png         # Tangkapan layar form terisi lengkap
+└── README.md
+```
 
 ---
 
-## 👥 Pengembang
-- **Mata Kuliah**: Pemrograman Aplikasi Bergerak
-- **Perguruan Tinggi**: Universitas Mulia
+## 🚀 Cara Menjalankan Aplikasi
+
+1. Buka folder ini di **Android Studio** (**File > Open**).
+2. Biarkan Gradle melakukan sinkronisasi otomatis.
+3. Jalankan aplikasi di emulator atau perangkat fisik Android dengan menekan **Run (Shift + F10)**.

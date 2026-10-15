@@ -1,27 +1,31 @@
 package com.example.profilmahasiswa
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -30,123 +34,183 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.AccountBalance
-import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Badge
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PersonOutline
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.Task
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.profilmahasiswa.ui.theme.AccentBlue
-import com.example.profilmahasiswa.ui.theme.BorderColor
-import com.example.profilmahasiswa.ui.theme.DisabledGray
-import com.example.profilmahasiswa.ui.theme.ErrorRed
-import com.example.profilmahasiswa.ui.theme.PrimaryBlue
-import com.example.profilmahasiswa.ui.theme.TextHint
-import com.example.profilmahasiswa.ui.theme.TextPrimary
-import com.example.profilmahasiswa.ui.theme.TextSecondary
-import com.example.profilmahasiswa.ui.theme.UniverMuliaBlue
-import com.example.profilmahasiswa.ui.theme.UniverMuliaDarkBlue
-import com.example.profilmahasiswa.ui.theme.UniverMuliaDeepBlue
-import com.example.profilmahasiswa.ui.theme.UniverMuliaGold
-import com.example.profilmahasiswa.ui.theme.UniverMuliaGreen
-import com.example.profilmahasiswa.ui.theme.UniverMuliaRed
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Root composable
-// ─────────────────────────────────────────────────────────────────────────────
-
+/**
+ * Root Composable untuk aplikasi Profil Mahasiswa.
+ * Mendemonstrasikan State Hoisting, Unidirectional Data Flow, dan Recomposition.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfilMahasiswaApp(viewModel: ProfilViewModel = viewModel()) {
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    // Trigger Snackbar when ViewModel signals it
-    LaunchedEffect(viewModel.showSnackbar) {
-        if (viewModel.showSnackbar) {
-            val result = snackbarHostState.showSnackbar(
-                message = "✅  Data profil berhasil disimpan!",
-                actionLabel = "OK",
-                duration = SnackbarDuration.Short
-            )
-            if (result == SnackbarResult.ActionPerformed || result == SnackbarResult.Dismissed) {
-                viewModel.onSnackbarDismissed()
-            }
-        }
-    }
-
     Scaffold(
-        snackbarHost = {
-            SnackbarHost(
-                hostState = snackbarHostState,
-                modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars)
+        topBar = {
+            TopAppBar(
+                title = {
+                    Column {
+                        Text(
+                            text = "Praktikum Jetpack Compose",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF0F172A)
+                        )
+                        Text(
+                            text = "State • Event • Recomposition",
+                            fontSize = 12.sp,
+                            color = Color(0xFF64748B),
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                },
+                actions = {
+                    // Tombol Isi Cepat Data Dewi Nofitta Sari
+                    IconButton(
+                        onClick = { viewModel.isiDataDewi() }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = "Isi Data Dewi",
+                            tint = Color(0xFF2563EB)
+                        )
+                    }
+                    // Tombol Reset
+                    IconButton(
+                        onClick = { viewModel.resetForm() }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Reset Form",
+                            tint = Color(0xFF64748B)
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White
+                ),
+                modifier = Modifier.shadow(2.dp)
             )
         },
-        containerColor = Color(0xFFF0F4FF)
+        containerColor = Color(0xFFF1F5F9)
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // ── University header with building visual ──
-            UniversityHeader()
+            // ─────────────────────────────────────────────────────────────────
+            // 1. KARTU PRATINJAU LANGSUNG (HEADER GRADASI BERANIMASI)
+            // ─────────────────────────────────────────────────────────────────
+            LivePreviewCard(
+                nama = viewModel.namaInput,
+                nim = viewModel.nimInput,
+                email = viewModel.emailInput,
+                prodi = viewModel.prodiInput,
+                semester = viewModel.semesterInput.toInt(),
+                isAktif = viewModel.isAktifInput,
+                inisial = viewModel.inisialNama
+            )
 
-            // ── Form card ──
-            FormCard(viewModel = viewModel)
+            // ─────────────────────────────────────────────────────────────────
+            // 2. BILAH KELENGKAPAN PROFIL (0 - 100%) BERANIMASI
+            // ─────────────────────────────────────────────────────────────────
+            CompletionProgressBar(
+                progress = viewModel.completionPercentage,
+                isNamaValid = viewModel.isNamaValid,
+                isNimValid = viewModel.isNimValid,
+                isEmailValid = viewModel.isEmailValid,
+                isProdiValid = viewModel.isProdiValid
+            )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            // ─────────────────────────────────────────────────────────────────
+            // 3. BANNER SUKSES (ANIMATED VISIBILITY)
+            // ─────────────────────────────────────────────────────────────────
+            AnimatedVisibility(
+                visible = viewModel.showSuccessBanner,
+                enter = fadeIn(tween(300)) + expandVertically(spring(stiffness = Spring.StiffnessMediumLow)),
+                exit = fadeOut(tween(200)) + shrinkVertically()
+            ) {
+                SuccessBanner(
+                    profile = viewModel.savedProfile,
+                    onDismiss = { viewModel.tutupBanner() }
+                )
+            }
 
-            // ── Digital student card ──
-            DigitalStudentCard(profile = viewModel.savedProfile)
+            // ─────────────────────────────────────────────────────────────────
+            // 4. FORMULIR INPUT MAHASISWA
+            // ─────────────────────────────────────────────────────────────────
+            FormInputCard(
+                viewModel = viewModel
+            )
+
+            // ─────────────────────────────────────────────────────────────────
+            // 5. PENJELASAN KONSEP STATE, EVENT & RECOMPOSITION
+            // ─────────────────────────────────────────────────────────────────
+            ComposeConceptCard()
 
             Spacer(modifier = Modifier.height(24.dp))
         }
@@ -154,818 +218,971 @@ fun ProfilMahasiswaApp(viewModel: ProfilViewModel = viewModel()) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// University header with building background effect
+// KOMPONEN 1: KARTU PRATINJAU LANGSUNG DENGAN GRADASI BERANIMASI
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun UniversityHeader() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                brush = Brush.horizontalGradient(
-                    colors = listOf(
-                        UniverMuliaDarkBlue,
-                        UniverMuliaBlue,
-                        Color(0xFF2A5FAA)
-                    )
-                )
-            )
-            .windowInsetsPadding(WindowInsets.statusBars)
-    ) {
-        // Right side – simulated building silhouette pattern
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 8.dp, top = 8.dp, bottom = 8.dp)
-        ) {
-            // Simulated building blocks
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(3.dp),
-                verticalAlignment = Alignment.Bottom,
-                modifier = Modifier.padding(top = 4.dp)
-            ) {
-                // Building silhouettes using boxes
-                BuildingBlock(width = 18, height = 50, alpha = 0.10f)
-                BuildingBlock(width = 22, height = 65, alpha = 0.12f)
-                BuildingBlock(width = 20, height = 45, alpha = 0.08f)
-                BuildingBlock(width = 26, height = 72, alpha = 0.14f)
-                BuildingBlock(width = 16, height = 38, alpha = 0.10f)
-            }
-            // Label overlay
-            Text(
-                text = "UNIVERSITAS MULIA",
-                color = Color.White.copy(alpha = 0.20f),
-                fontSize = 8.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(end = 4.dp, bottom = 2.dp)
-            )
-        }
-
-        // Left side – Logo + Text
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            // University logo placeholder
-            Box(
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.12f))
-                    .border(2.dp, UniverMuliaGold, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        imageVector = Icons.Default.School,
-                        contentDescription = null,
-                        tint = UniverMuliaGold,
-                        modifier = Modifier.size(22.dp)
-                    )
-                    Text(
-                        text = "UM",
-                        color = Color.White,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.ExtraBold
-                    )
-                }
-            }
-
-            Column {
-                Text(
-                    text = "SISTEM AKADEMIK TERPADU",
-                    color = UniverMuliaGold,
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 1.5.sp
-                )
-                Text(
-                    text = "UNIVERSITAS MULIA",
-                    color = Color.White,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 0.5.sp
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    DotIndicator(color = UniverMuliaGold)
-                    Text(
-                        text = "Inovatif",
-                        color = Color.White.copy(alpha = 0.85f),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                    DotIndicator(color = UniverMuliaGreen)
-                    Text(
-                        text = "Mandiri",
-                        color = Color.White.copy(alpha = 0.85f),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                    DotIndicator(color = AccentBlue)
-                    Text(
-                        text = "Humanis",
-                        color = Color.White.copy(alpha = 0.85f),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun BuildingBlock(width: Int, height: Int, alpha: Float) {
-    Box(
-        modifier = Modifier
-            .width(width.dp)
-            .height(height.dp)
-            .clip(RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp))
-            .background(Color.White.copy(alpha = alpha))
-    )
-}
-
-@Composable
-private fun DotIndicator(color: Color) {
-    Box(
-        modifier = Modifier
-            .size(6.dp)
-            .clip(CircleShape)
-            .background(color)
-    )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Main form card (white rounded card)
-// ─────────────────────────────────────────────────────────────────────────────
-
-@Composable
-private fun FormCard(viewModel: ProfilViewModel) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .offset(y = (-12).dp)
-            .padding(horizontal = 12.dp),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 18.dp, vertical = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(0.dp)
-        ) {
-            // ── Form title row ──
-            FormTitleRow()
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // ── Status card (Belum ada data / profile preview) ──
-            StatusPreviewCard(profile = viewModel.savedProfile)
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // ── Input: Nama Lengkap ──
-            FormFieldWithIcon(
-                icon = Icons.Default.PersonOutline,
-                iconTint = PrimaryBlue,
-                label = "Nama Lengkap",
-                value = viewModel.namaInput,
-                onValueChange = viewModel::onNamaChange,
-                placeholder = "Masukkan nama lengkap",
-                errorMessage = viewModel.namaError,
-                keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Words,
-                    imeAction = ImeAction.Next
-                ),
-                onFocusLost = viewModel::onNamaFocusLost
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // ── Input: NIM ──
-            FormFieldWithIcon(
-                icon = Icons.Default.Badge,
-                iconTint = PrimaryBlue,
-                label = "NIM (Nomor Induk Mahasiswa)",
-                value = viewModel.nimInput,
-                onValueChange = viewModel::onNimChange,
-                placeholder = "Contoh: 2411009",
-                errorMessage = viewModel.nimError,
-                leadingIcon = Icons.Default.Badge,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Next
-                ),
-                onFocusLost = viewModel::onNimFocusLost
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // ── Input: Program Studi ──
-            FormFieldWithIcon(
-                icon = Icons.Default.School,
-                iconTint = PrimaryBlue,
-                label = "Program Studi",
-                value = viewModel.prodiInput,
-                onValueChange = viewModel::onProdiChange,
-                placeholder = "Contoh: S1 Informatika",
-                errorMessage = viewModel.prodiError,
-                leadingIcon = Icons.Default.MenuBook,
-                trailingIcon = Icons.Default.ArrowDropDown,
-                keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Words,
-                    imeAction = ImeAction.Done
-                ),
-                onFocusLost = viewModel::onProdiFocusLost
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // ── Save button ──
-            SaveButton(
-                enabled = viewModel.isFormValid,
-                onClick = viewModel::simpanData
-            )
-        }
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Form title row
-// ─────────────────────────────────────────────────────────────────────────────
-
-@Composable
-private fun FormTitleRow() {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.Top,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.weight(1f)
-        ) {
-            // Blue icon circle with person icon
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(PrimaryBlue),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-            Column {
-                Text(
-                    text = "Form Profil Mahasiswa",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = TextPrimary
-                )
-                Text(
-                    text = "Lengkapi data diri Anda untuk melanjutkan proses akademik.",
-                    fontSize = 12.sp,
-                    color = TextSecondary,
-                    lineHeight = 16.sp
-                )
-            }
-        }
-
-        // Right side motto text
-        Column(
-            horizontalAlignment = Alignment.End,
-            modifier = Modifier.padding(start = 8.dp)
-        ) {
-            Text(
-                text = "Bersama",
-                fontSize = 10.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = PrimaryBlue.copy(alpha = 0.7f),
-                textAlign = TextAlign.End
-            )
-            Text(
-                text = "Membangun",
-                fontSize = 10.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = PrimaryBlue.copy(alpha = 0.7f),
-                textAlign = TextAlign.End
-            )
-            Text(
-                text = "Masa Depan",
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold,
-                color = PrimaryBlue,
-                textAlign = TextAlign.End
-            )
-        }
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Status preview card (shows saved data or "Belum ada data")
-// ─────────────────────────────────────────────────────────────────────────────
-
-@Composable
-private fun StatusPreviewCard(profile: MahasiswaProfile?) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (profile != null) Color(0xFFE8F5E9) else Color(0xFFF0F4FF)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            // Graduation cap icon
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(
-                        if (profile != null)
-                            UniverMuliaGreen.copy(alpha = 0.15f)
-                        else
-                            PrimaryBlue.copy(alpha = 0.1f)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.School,
-                    contentDescription = null,
-                    tint = if (profile != null) UniverMuliaGreen else PrimaryBlue,
-                    modifier = Modifier.size(28.dp)
-                )
-            }
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = if (profile != null) profile.nama else "Belum ada data",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    color = TextPrimary
-                )
-                Text(
-                    text = if (profile != null)
-                        "NIM: ${profile.nim} • ${profile.programStudi}"
-                    else
-                        "Silakan lengkapi data profil mahasiswa Anda.",
-                    fontSize = 12.sp,
-                    color = TextSecondary,
-                    lineHeight = 16.sp
-                )
-            }
-
-            // Arrow button
-            IconButton(
-                onClick = { },
-                modifier = Modifier
-                    .size(36.dp)
-                    .border(
-                        width = 1.dp,
-                        color = if (profile != null)
-                            UniverMuliaGreen.copy(alpha = 0.3f)
-                        else
-                            PrimaryBlue.copy(alpha = 0.2f),
-                        shape = RoundedCornerShape(10.dp)
-                    ),
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = Color.Transparent
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = "Detail",
-                    tint = if (profile != null) UniverMuliaGreen else PrimaryBlue,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-        }
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Form field with external icon label
-// ─────────────────────────────────────────────────────────────────────────────
-
-@Composable
-private fun FormFieldWithIcon(
-    icon: ImageVector,
-    iconTint: Color,
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String,
-    errorMessage: String?,
-    leadingIcon: ImageVector? = null,
-    trailingIcon: ImageVector? = null,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    keyboardActions: KeyboardActions = KeyboardActions.Default,
-    onFocusLost: () -> Unit = {}
+fun LivePreviewCard(
+    nama: String,
+    nim: String,
+    email: String,
+    prodi: String,
+    semester: Int,
+    isAktif: Boolean,
+    inisial: String,
+    modifier: Modifier = Modifier
 ) {
-    val isError = errorMessage != null
-    val fieldBorderColor = when {
-        isError -> ErrorRed
-        value.isNotEmpty() -> PrimaryBlue
-        else -> BorderColor
-    }
-
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        // Label row with icon
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = iconTint,
-                modifier = Modifier.size(20.dp)
-            )
-            Text(
-                text = label,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = TextPrimary
-            )
-            Text(
-                text = "*",
-                color = ErrorRed,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        // Text field
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = Modifier
-                .fillMaxWidth()
-                .onFocusChanged { focusState ->
-                    if (!focusState.isFocused) onFocusLost()
-                },
-            placeholder = {
-                Text(
-                    text = placeholder,
-                    color = TextHint,
-                    fontSize = 14.sp
-                )
-            },
-            leadingIcon = if (leadingIcon != null) {
-                {
-                    Icon(
-                        imageVector = leadingIcon,
-                        contentDescription = null,
-                        tint = if (isError) ErrorRed
-                        else if (value.isNotEmpty()) PrimaryBlue
-                        else TextHint,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            } else null,
-            trailingIcon = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    // Valid checkmark
-                    AnimatedVisibility(
-                        visible = value.isNotEmpty() && !isError,
-                        enter = fadeIn(tween(200)),
-                        exit = fadeOut(tween(200))
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = "Valid",
-                            tint = UniverMuliaGreen,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                    // Optional trailing icon (dropdown arrow)
-                    if (trailingIcon != null) {
-                        Icon(
-                            imageVector = trailingIcon,
-                            contentDescription = null,
-                            tint = TextHint,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                }
-            },
-            isError = isError,
-            supportingText = if (isError) {
-                {
-                    Text(
-                        text = errorMessage!!,
-                        color = ErrorRed,
-                        fontSize = 12.sp
-                    )
-                }
-            } else null,
-            keyboardOptions = keyboardOptions,
-            keyboardActions = keyboardActions,
-            singleLine = true,
-            shape = RoundedCornerShape(10.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = PrimaryBlue,
-                unfocusedBorderColor = BorderColor,
-                errorBorderColor = ErrorRed,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color(0xFFFAFBFF),
-                errorContainerColor = Color(0xFFFFF5F5),
-                focusedTextColor = TextPrimary,
-                unfocusedTextColor = TextPrimary,
-                cursorColor = PrimaryBlue
-            )
-        )
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Save button with arrow icon on right
-// ─────────────────────────────────────────────────────────────────────────────
-
-@Composable
-private fun SaveButton(enabled: Boolean, onClick: () -> Unit) {
-    val scale by animateFloatAsState(
-        targetValue = if (enabled) 1f else 0.97f,
-        animationSpec = spring(stiffness = Spring.StiffnessMedium),
-        label = "buttonScale"
+    // Animasi transisi warna gradasi berdasarkan status aktif (Aktif vs Cuti)
+    val startColor by animateColorAsState(
+        targetValue = if (isAktif) Color(0xFF1E3A8A) else Color(0xFF334155),
+        animationSpec = tween(600),
+        label = "GradStartColor"
+    )
+    val midColor by animateColorAsState(
+        targetValue = if (isAktif) Color(0xFF4338CA) else Color(0xFF475569),
+        animationSpec = tween(600),
+        label = "GradMidColor"
+    )
+    val endColor by animateColorAsState(
+        targetValue = if (isAktif) Color(0xFF0D9488) else Color(0xFF64748B),
+        animationSpec = tween(600),
+        label = "GradEndColor"
     )
 
-    Button(
-        onClick = onClick,
-        enabled = enabled,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(54.dp)
-            .scale(scale),
-        shape = RoundedCornerShape(14.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = PrimaryBlue,
-            disabledContainerColor = DisabledGray,
-            contentColor = Color.White,
-            disabledContentColor = Color.White.copy(alpha = 0.7f)
-        ),
-        elevation = ButtonDefaults.buttonElevation(
-            defaultElevation = if (enabled) 4.dp else 0.dp
-        )
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            // Left spacer for centering
-            Spacer(modifier = Modifier.width(24.dp))
-
-            // Center content
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Task,
-                    contentDescription = null,
-                    modifier = Modifier.size(22.dp)
-                )
-                Text(
-                    text = "Simpan Perubahan",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 0.3.sp
-                )
-            }
-
-            // Right arrow
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = null,
-                modifier = Modifier.size(22.dp)
-            )
-        }
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Digital student card (horizontal layout with 4 columns)
-// ─────────────────────────────────────────────────────────────────────────────
-
-@Composable
-private fun DigitalStudentCard(profile: MahasiswaProfile?) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp),
-        shape = RoundedCornerShape(18.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        modifier = modifier.fillMaxWidth()
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            UniverMuliaDarkBlue,
-                            UniverMuliaDeepBlue
-                        )
+                    brush = Brush.linearGradient(
+                        colors = listOf(startColor, midColor, endColor)
                     )
                 )
+                .padding(20.dp)
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                // ── Top stripe ──
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(4.dp)
-                            .background(UniverMuliaRed)
-                    )
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(4.dp)
-                            .background(UniverMuliaGold)
-                    )
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(4.dp)
-                            .background(PrimaryBlue)
-                    )
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(4.dp)
-                            .background(UniverMuliaGreen)
-                    )
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Baris Atas: Tag Live Recomposition & Badge Status Mahasiswa
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Tag Recomposition
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color.White.copy(alpha = 0.18f)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = "⚡",
+                                fontSize = 11.sp
+                            )
+                            Text(
+                                text = "LIVE PREVIEW",
+                                color = Color.White,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 0.8.sp
+                            )
+                        }
+                    }
+
+                    // Badge Status Aktif/Non-Aktif
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = if (isAktif) Color(0xFF10B981).copy(alpha = 0.25f)
+                        else Color(0xFFEF4444).copy(alpha = 0.25f),
+                        border = androidx.compose.foundation.BorderStroke(
+                            1.dp,
+                            if (isAktif) Color(0xFF6EE7B7) else Color(0xFFFCA5A5)
+                        )
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .background(
+                                        color = if (isAktif) Color(0xFF34D399) else Color(0xFFF87171),
+                                        shape = CircleShape
+                                    )
+                            )
+                            Text(
+                                text = if (isAktif) "MAHASISWA AKTIF" else "NON-AKTIF / CUTI",
+                                color = Color.White,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
                 }
 
-                // ── Header section ──
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 14.dp)
+                // Baris Tengah: Avatar Inisial & Identitas Utama (Nama, NIM)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    // KARTU DIGITAL label
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    // Avatar Inisial Bulat
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(68.dp)
+                            .shadow(4.dp, CircleShape)
+                            .background(Color.White.copy(alpha = 0.22f), CircleShape)
+                            .border(2.dp, Color.White.copy(alpha = 0.6f), CircleShape)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.School,
-                            contentDescription = null,
-                            tint = UniverMuliaGold,
-                            modifier = Modifier.size(18.dp)
-                        )
                         Text(
-                            text = "KARTU DIGITAL",
-                            color = UniverMuliaGold,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.5.sp
-                        )
-                        Text(
-                            text = "•",
-                            color = Color.White.copy(alpha = 0.5f),
-                            fontSize = 10.sp
-                        )
-                        Text(
-                            text = "SEMESTER GENAP",
-                            color = Color.White.copy(alpha = 0.7f),
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Medium,
+                            text = inisial,
+                            color = Color.White,
+                            fontSize = 26.sp,
+                            fontWeight = FontWeight.ExtraBold,
                             letterSpacing = 1.sp
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    // Title row
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    // Kolom Nama & NIM
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.School,
-                            contentDescription = null,
-                            tint = UniverMuliaGold.copy(alpha = 0.6f),
-                            modifier = Modifier.size(32.dp)
-                        )
                         Text(
-                            text = "Profil Mahasiswa",
+                            text = if (nama.isNotBlank()) nama else "Nama Mahasiswa",
                             color = Color.White,
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            fontStyle = if (nama.isBlank()) FontStyle.Italic else FontStyle.Normal
                         )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Badge,
+                                contentDescription = "NIM",
+                                tint = Color.White.copy(alpha = 0.85f),
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = if (nim.isNotBlank()) "NIM: $nim" else "NIM: Belum diisi",
+                                color = Color.White.copy(alpha = 0.9f),
+                                fontSize = 14.sp,
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
                 }
 
                 HorizontalDivider(
-                    color = Color.White.copy(alpha = 0.1f),
-                    thickness = 1.dp,
-                    modifier = Modifier.padding(horizontal = 20.dp)
+                    color = Color.White.copy(alpha = 0.2f),
+                    thickness = 1.dp
                 )
 
-                // ── 4 column data section ──
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(IntrinsicSize.Min)
-                        .padding(horizontal = 16.dp, vertical = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                // Baris Bawah: Program Studi, Semester, dan Email
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    CardDataColumn(
-                        icon = Icons.Default.PersonOutline,
-                        label = "Nama",
-                        value = profile?.nama,
-                        modifier = Modifier.weight(1f)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Badge Program Studi
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = Color.White.copy(alpha = 0.16f),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.School,
+                                    contentDescription = "Prodi",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Text(
+                                    text = if (prodi.isNotBlank()) prodi else "Pilih Prodi",
+                                    color = Color.White,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+
+                        // Badge Semester
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = Color.White.copy(alpha = 0.16f)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.DateRange,
+                                    contentDescription = "Semester",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Text(
+                                    text = "Semester $semester",
+                                    color = Color.White,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+                    }
+
+                    // Baris Email
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.padding(start = 2.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Email,
+                            contentDescription = "Email",
+                            tint = Color.White.copy(alpha = 0.85f),
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Text(
+                            text = if (email.isNotBlank()) email else "email@kampus.ac.id",
+                            color = Color.White.copy(alpha = 0.85f),
+                            fontSize = 12.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            fontStyle = if (email.isBlank()) FontStyle.Italic else FontStyle.Normal
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// KOMPONEN 2: BILAH KELENGKAPAN PROFIL (0 - 100%) BERANIMASI
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+fun CompletionProgressBar(
+    progress: Float,
+    isNamaValid: Boolean,
+    isNimValid: Boolean,
+    isEmailValid: Boolean,
+    isProdiValid: Boolean,
+    modifier: Modifier = Modifier
+) {
+    // Animasi nilai progres dari 0f sampai 1f
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "ProgressAnimation"
+    )
+
+    // Animasi warna progress bar: Amber jika belum 100%, Hijau toska jika 100%
+    val progressColor by animateColorAsState(
+        targetValue = if (progress >= 1f) Color(0xFF10B981) else Color(0xFF3B82F6),
+        animationSpec = tween(400),
+        label = "ProgressColor"
+    )
+
+    Card(
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = if (progress >= 1f) Icons.Default.CheckCircle else Icons.Default.Info,
+                        contentDescription = "Status",
+                        tint = progressColor,
+                        modifier = Modifier.size(20.dp)
                     )
-                    VerticalDivider(
-                        color = Color.White.copy(alpha = 0.15f),
+                    Text(
+                        text = "Kelengkapan Profil",
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp,
+                        color = Color(0xFF1E293B)
+                    )
+                }
+                Text(
+                    text = "${(animatedProgress * 100).toInt()}%",
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 16.sp,
+                    color = progressColor
+                )
+            }
+
+            // Bilah Progres Linear Beranimasi
+            LinearProgressIndicator(
+                progress = { animatedProgress },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(10.dp)
+                    .clip(RoundedCornerShape(5.dp)),
+                color = progressColor,
+                trackColor = Color(0xFFE2E8F0),
+                strokeCap = StrokeCap.Round
+            )
+
+            // Indikator Checklist Singkat
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                MilestoneItem(label = "Nama", isDone = isNamaValid)
+                MilestoneItem(label = "NIM", isDone = isNimValid)
+                MilestoneItem(label = "Email", isDone = isEmailValid)
+                MilestoneItem(label = "Prodi", isDone = isProdiValid)
+                MilestoneItem(label = "Semester", isDone = true)
+            }
+        }
+    }
+}
+
+@Composable
+private fun MilestoneItem(label: String, isDone: Boolean) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(3.dp)
+    ) {
+        Icon(
+            imageVector = if (isDone) Icons.Default.CheckCircle else Icons.Default.Close,
+            contentDescription = null,
+            tint = if (isDone) Color(0xFF10B981) else Color(0xFF94A3B8),
+            modifier = Modifier.size(13.dp)
+        )
+        Text(
+            text = label,
+            fontSize = 11.sp,
+            color = if (isDone) Color(0xFF334155) else Color(0xFF94A3B8),
+            fontWeight = if (isDone) FontWeight.SemiBold else FontWeight.Normal
+        )
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// KOMPONEN 3: BANNER SUKSES (ANIMATED VISIBILITY)
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+fun SuccessBanner(
+    profile: MahasiswaProfile?,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (profile == null) return
+
+    Card(
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFECFDF5)),
+        border = androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFF6EE7B7)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Box(
                         modifier = Modifier
-                            .fillMaxHeight()
-                            .width(1.dp)
+                            .size(36.dp)
+                            .background(Color(0xFF10B981), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Sukses",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    Column {
+                        Text(
+                            text = "Profil Berhasil Disimpan!",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp,
+                            color = Color(0xFF065F46)
+                        )
+                        Text(
+                            text = "State profil tersimpan & recomposition aktif",
+                            fontSize = 12.sp,
+                            color = Color(0xFF047857)
+                        )
+                    }
+                }
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Tutup",
+                        tint = Color(0xFF065F46),
+                        modifier = Modifier.size(18.dp)
                     )
-                    CardDataColumn(
-                        icon = Icons.Default.Badge,
-                        label = "NIM",
-                        value = profile?.nim,
-                        modifier = Modifier.weight(1f)
+                }
+            }
+
+            HorizontalDivider(color = Color(0xFFA7F3D0), thickness = 1.dp)
+
+            // Ringkasan Data Tersimpan
+            Column(
+                modifier = Modifier.padding(top = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = "• Mahasiswa: ${profile.nama} (${profile.nim})",
+                    fontSize = 13.sp,
+                    color = Color(0xFF064E3B),
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = "• Program Studi: ${profile.programStudi} - Semester ${profile.semester}",
+                    fontSize = 13.sp,
+                    color = Color(0xFF064E3B)
+                )
+                Text(
+                    text = "• Email: ${profile.email}",
+                    fontSize = 13.sp,
+                    color = Color(0xFF064E3B)
+                )
+                Text(
+                    text = "• Status: ${if (profile.isAktif) "Aktif Mengikuti Perkuliahan" else "Non-Aktif / Cuti"}",
+                    fontSize = 13.sp,
+                    color = Color(0xFF064E3B),
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// KOMPONEN 4: FORMULIR INPUT MAHASISWA
+// ─────────────────────────────────────────────────────────────────────────────
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun FormInputCard(
+    viewModel: ProfilViewModel,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp)
+        ) {
+            // Header Form
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    text = "Formulir Profil Mahasiswa",
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF0F172A)
+                )
+                Text(
+                    text = "Ketik atau ubah nilai di bawah untuk melihat live recomposition",
+                    fontSize = 12.sp,
+                    color = Color(0xFF64748B)
+                )
+            }
+
+            HorizontalDivider(color = Color(0xFFF1F5F9))
+
+            // 1. INPUT NAMA
+            OutlinedTextField(
+                value = viewModel.namaInput,
+                onValueChange = viewModel::onNamaChange,
+                label = { Text("Nama Lengkap") },
+                placeholder = { Text("Contoh: Dewi Nofitta Sari") },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Nama",
+                        tint = Color(0xFF2563EB)
                     )
-                    VerticalDivider(
-                        color = Color.White.copy(alpha = 0.15f),
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .width(1.dp)
+                },
+                trailingIcon = {
+                    if (viewModel.namaInput.isNotEmpty()) {
+                        IconButton(onClick = { viewModel.onNamaChange("") }) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Hapus Nama",
+                                tint = Color(0xFF94A3B8)
+                            )
+                        }
+                    }
+                },
+                isError = viewModel.namaError != null,
+                supportingText = {
+                    viewModel.namaError?.let {
+                        Text(text = it, color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF2563EB),
+                    unfocusedBorderColor = Color(0xFFCBD5E1)
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // 2. INPUT NIM (HANYA ANGKA)
+            OutlinedTextField(
+                value = viewModel.nimInput,
+                onValueChange = viewModel::onNimChange,
+                label = { Text("Nomor Induk Mahasiswa (NIM)") },
+                placeholder = { Text("Contoh: 2411065") },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Badge,
+                        contentDescription = "NIM",
+                        tint = Color(0xFF2563EB)
                     )
-                    CardDataColumn(
-                        icon = Icons.Default.MenuBook,
-                        label = "Program Studi",
-                        value = profile?.programStudi,
-                        modifier = Modifier.weight(1f)
+                },
+                trailingIcon = {
+                    if (viewModel.nimInput.isNotEmpty()) {
+                        IconButton(onClick = { viewModel.onNimChange("") }) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Hapus NIM",
+                                tint = Color(0xFF94A3B8)
+                            )
+                        }
+                    }
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                isError = viewModel.nimError != null,
+                supportingText = {
+                    if (viewModel.nimError != null) {
+                        Text(text = viewModel.nimError!!, color = MaterialTheme.colorScheme.error)
+                    } else {
+                        Text("Hanya angka (contoh: 2411065)", color = Color(0xFF64748B))
+                    }
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF2563EB),
+                    unfocusedBorderColor = Color(0xFFCBD5E1)
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // 3. INPUT EMAIL (VALIDASI FORMAT)
+            OutlinedTextField(
+                value = viewModel.emailInput,
+                onValueChange = viewModel::onEmailChange,
+                label = { Text("Alamat Email Kampus") },
+                placeholder = { Text("Contoh: dewi.nofitta@mhs.ac.id") },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Email,
+                        contentDescription = "Email",
+                        tint = Color(0xFF2563EB)
                     )
-                    VerticalDivider(
-                        color = Color.White.copy(alpha = 0.15f),
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .width(1.dp)
+                },
+                trailingIcon = {
+                    if (viewModel.emailInput.isNotEmpty()) {
+                        IconButton(onClick = { viewModel.onEmailChange("") }) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Hapus Email",
+                                tint = Color(0xFF94A3B8)
+                            )
+                        }
+                    }
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                isError = viewModel.emailError != null,
+                supportingText = {
+                    if (viewModel.emailError != null) {
+                        Text(text = viewModel.emailError!!, color = MaterialTheme.colorScheme.error)
+                    } else {
+                        Text("Format email valid (mengandung @ dan domain)", color = Color(0xFF64748B))
+                    }
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF2563EB),
+                    unfocusedBorderColor = Color(0xFFCBD5E1)
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // 4. PILIH PROGRAM STUDI (CHIP)
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.School,
+                        contentDescription = null,
+                        tint = Color(0xFF2563EB),
+                        modifier = Modifier.size(18.dp)
                     )
-                    CardDataColumn(
-                        icon = Icons.Default.AccountBalance,
-                        label = "Perguruan Tinggi",
-                        value = "Universitas Mulia",
-                        valueColor = UniverMuliaGold,
-                        modifier = Modifier.weight(1f)
+                    Text(
+                        text = "Program Studi",
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp,
+                        color = Color(0xFF1E293B)
                     )
                 }
 
-                HorizontalDivider(
-                    color = Color.White.copy(alpha = 0.08f),
-                    thickness = 1.dp,
-                    modifier = Modifier.padding(horizontal = 20.dp)
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    viewModel.daftarProdi.forEach { prodi ->
+                        val isSelected = viewModel.prodiInput == prodi
+                        FilterChip(
+                            selected = isSelected,
+                            onClick = { viewModel.onProdiSelect(prodi) },
+                            label = {
+                                Text(
+                                    text = prodi,
+                                    fontSize = 12.sp,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                )
+                            },
+                            leadingIcon = if (isSelected) {
+                                {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = "Terpilih",
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            } else null,
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = Color(0xFF2563EB),
+                                selectedLabelColor = Color.White,
+                                selectedLeadingIconColor = Color.White,
+                                containerColor = Color(0xFFF8FAFC),
+                                labelColor = Color(0xFF334155)
+                            ),
+                            border = FilterChipDefaults.filterChipBorder(
+                                enabled = true,
+                                selected = isSelected,
+                                borderColor = Color(0xFFCBD5E1),
+                                selectedBorderColor = Color(0xFF2563EB)
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                    }
+                }
+            }
+
+            // 5. PILIH SEMESTER (SLIDER)
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.DateRange,
+                            contentDescription = null,
+                            tint = Color(0xFF2563EB),
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Text(
+                            text = "Semester",
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp,
+                            color = Color(0xFF1E293B)
+                        )
+                    }
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
+                        color = Color(0xFFEFF6FF)
+                    ) {
+                        Text(
+                            text = "Semester ${viewModel.semesterInput.toInt()}",
+                            color = Color(0xFF1D4ED8),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+
+                Slider(
+                    value = viewModel.semesterInput,
+                    onValueChange = viewModel::onSemesterChange,
+                    valueRange = 1f..8f,
+                    steps = 6,
+                    colors = SliderDefaults.colors(
+                        thumbColor = Color(0xFF2563EB),
+                        activeTrackColor = Color(0xFF2563EB),
+                        inactiveTrackColor = Color(0xFFE2E8F0)
+                    ),
+                    modifier = Modifier.fillMaxWidth()
                 )
 
-                // ── Footer – motivational tagline ──
-                Box(
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(text = "Sem 1", fontSize = 11.sp, color = Color(0xFF94A3B8))
+                    Text(text = "Sem 4", fontSize = 11.sp, color = Color(0xFF94A3B8))
+                    Text(text = "Sem 8", fontSize = 11.sp, color = Color(0xFF94A3B8))
+                }
+            }
+
+            // 6. STATUS MAHASISWA AKTIF (SWITCH)
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = Color(0xFFF8FAFC),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 12.dp)
+                        .padding(14.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        Text(
+                            text = "Status Mahasiswa Aktif",
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp,
+                            color = Color(0xFF1E293B)
+                        )
+                        Text(
+                            text = if (viewModel.isAktifInput)
+                                "Warna gradasi kartu di atas menjadi biru-teal dinamis"
+                            else
+                                "Warna gradasi kartu di atas bertransisi menjadi abu-abu redup",
+                            fontSize = 11.sp,
+                            color = Color(0xFF64748B)
+                        )
+                    }
+                    Switch(
+                        checked = viewModel.isAktifInput,
+                        onCheckedChange = viewModel::onAktifChange,
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = Color(0xFF10B981),
+                            uncheckedThumbColor = Color.White,
+                            uncheckedTrackColor = Color(0xFF94A3B8)
+                        )
+                    )
+                }
+            }
+
+            // 7. TOMBOL SIMPAN
+            Button(
+                onClick = viewModel::simpanProfil,
+                enabled = viewModel.isFormComplete,
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF2563EB),
+                    disabledContainerColor = Color(0xFFCBD5E1),
+                    contentColor = Color.White,
+                    disabledContentColor = Color(0xFF64748B)
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Save,
+                        contentDescription = "Simpan",
+                        modifier = Modifier.size(20.dp)
+                    )
                     Text(
-                        text = "Langkah Kecil\nMenuju Masa Depan Besar",
-                        color = UniverMuliaGold.copy(alpha = 0.7f),
+                        text = if (viewModel.isFormComplete) "Simpan Data Profil" else "Lengkapi Form untuk Simpan",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp
+                    )
+                }
+            }
+
+            if (!viewModel.isFormComplete) {
+                Text(
+                    text = "⚠️ Tombol Simpan aktif setelah Nama, NIM, Email, dan Prodi terisi valid (100%).",
+                    fontSize = 11.sp,
+                    color = Color(0xFF64748B),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            // TOMBOL CEPAT ISI DATA SAYA (DEWI NOFITTA SARI - 2411065)
+            OutlinedButton(
+                onClick = { viewModel.isiDataDewi() },
+                shape = RoundedCornerShape(14.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF93C5FD)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AutoAwesome,
+                        contentDescription = null,
+                        tint = Color(0xFF2563EB),
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Text(
+                        text = "Isi Data Otomatis: Dewi Nofitta Sari (2411065)",
+                        color = Color(0xFF1D4ED8),
                         fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
-                        fontStyle = FontStyle.Italic,
-                        fontFamily = FontFamily.Serif,
-                        textAlign = TextAlign.End,
-                        lineHeight = 16.sp,
-                        modifier = Modifier.align(Alignment.CenterEnd)
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// KOMPONEN 5: KARTU EDUKASI STATE, EVENT & RECOMPOSITION
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+fun ComposeConceptCard(modifier: Modifier = Modifier) {
+    var isExpanded by remember { mutableStateOf(false) }
+
+    Card(
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { isExpanded = !isExpanded },
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.HelpOutline,
+                        contentDescription = null,
+                        tint = Color(0xFF2563EB),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Text(
+                        text = "Konsep Jetpack Compose di Aplikasi Ini",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        color = Color(0xFF1E293B)
+                    )
+                }
+                Icon(
+                    imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                    contentDescription = if (isExpanded) "Tutup" else "Buka",
+                    tint = Color(0xFF64748B)
+                )
+            }
+
+            AnimatedVisibility(visible = isExpanded) {
+                Column(
+                    modifier = Modifier.padding(top = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    ConceptItem(
+                        badge = "STATE",
+                        badgeColor = Color(0xFF3B82F6),
+                        title = "Nilai yang Diobservasi",
+                        description = "Disimpan di ViewModel menggunakan 'mutableStateOf' (nama, nim, email, prodi, semester, isAktif). Menjadi satu-satunya sumber kebenaran (Single Source of Truth)."
+                    )
+                    ConceptItem(
+                        badge = "EVENT",
+                        badgeColor = Color(0xFF10B981),
+                        title = "Aksi Pengguna",
+                        description = "Setiap interaksi pengguna (ketik nama, pilih chip prodi, geser slider semester, toggle switch) mengirimkan event ke ViewModel untuk memperbarui state."
+                    )
+                    ConceptItem(
+                        badge = "RECOMPOSITION",
+                        badgeColor = Color(0xFF8B5CF6),
+                        title = "Pembaruan UI Cerdas",
+                        description = "Saat state berubah, Compose hanya me-render ulang fungsi Composable yang membaca state tersebut (Kartu Pratinjau, Progress Bar, Tombol Simpan), tanpa reload layar."
                     )
                 }
             }
@@ -974,41 +1191,50 @@ private fun DigitalStudentCard(profile: MahasiswaProfile?) {
 }
 
 @Composable
-private fun CardDataColumn(
-    icon: ImageVector,
-    label: String,
-    value: String?,
-    valueColor: Color = Color.White,
-    modifier: Modifier = Modifier
+private fun ConceptItem(
+    badge: String,
+    badgeColor: Color,
+    title: String,
+    description: String
 ) {
-    Column(
-        modifier = modifier.padding(horizontal = 4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = Color(0xFFF8FAFC),
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = Color.White.copy(alpha = 0.5f),
-            modifier = Modifier.size(16.dp)
-        )
-        Text(
-            text = label,
-            color = Color.White.copy(alpha = 0.6f),
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Medium,
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Text(
-            text = value ?: "–",
-            color = if (value != null) valueColor else Color.White.copy(alpha = 0.3f),
-            fontSize = 11.sp,
-            fontWeight = if (value != null) FontWeight.Bold else FontWeight.Normal,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
-        )
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = badgeColor
+                ) {
+                    Text(
+                        text = badge,
+                        color = Color.White,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                }
+                Text(
+                    text = title,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 13.sp,
+                    color = Color(0xFF0F172A)
+                )
+            }
+            Text(
+                text = description,
+                fontSize = 12.sp,
+                color = Color(0xFF475569),
+                lineHeight = 16.sp
+            )
+        }
     }
 }
